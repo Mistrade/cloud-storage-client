@@ -1,28 +1,39 @@
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from './reducers'
-import { UserInfoMethods } from './reducers/UserReducer'
+import { UserInfoMethods } from './reducers/UserReducer/thunk'
+import { Route, Switch } from 'react-router-dom'
+import { Header } from './components/Header'
+import { AuthPage } from './pages/AuthPage/AuthPage'
 
-function App() {
-  const notifications = useAppSelector(state => state.notification.notificationList)
+const App = () => {
+  const notifications = useAppSelector( state => state.notification.notificationList )
   const dispatch = useAppDispatch()
-  useEffect(() => {
-    dispatch(UserInfoMethods.registration({
+  useEffect( () => {
+    dispatch( UserInfoMethods.registration( {
       email: 'djnsfabhvfsabfk;saljkh',
       password: '81267459628',
       confirmPassword: '492186795468'
-    }))
-  }, [dispatch])
+    } ) )
+  }, [dispatch] )
 
-  useEffect(() => {
-    console.log(notifications)
-  }, [notifications])
+  useEffect( () => {
+    console.log( notifications )
+  }, [notifications] )
 
 
   return (
     <div className="App">
-      Its my cloud storage
+      <Header />
+      <Switch>
+        <Route path={'/'} exact={true}>
+
+        </Route>
+        <Route path={'/auth/:registration?'}>
+          <AuthPage />
+        </Route>
+      </Switch>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

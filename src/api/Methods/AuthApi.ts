@@ -14,14 +14,13 @@ export interface ApiMessage {
   message: string
 }
 
-interface LoginSuccessModel {
-  token: string,
-  userData: UserInfoModel
+export interface LoginSuccessModel {
+  userData: UserDataModel
 }
 
 interface AuthApiModel {
   registration: (data: RegistrationModel) => ApiResponse<ApiMessage>,
-  login: (data: LoginModel) => ApiResponse<UserDataModel | ApiMessage>
+  login: (data: LoginModel) => ApiResponse<LoginSuccessModel | ApiMessage>
 }
 
 export const AuthApiConfig = {
@@ -42,6 +41,6 @@ export const AuthApi: AuthApiModel = {
   async login(data){
 
     //Принимает объект вида LoginModel и возвращает объект вида LoginSuccessModel
-    return await Api.post<LoginModel, UserDataModel>(apiURLS.login, data)
+    return await Api.post<LoginModel, LoginSuccessModel>(apiURLS.login, data)
   }
 }

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { UserInfoMethods } from '../UserReducer'
 import {default as UUID} from 'node-uuid'
+import { UserInfoMethods } from '../UserReducer/thunk'
 
 interface NotificationReducerModel {
   notificationList: Array<NotificationItemModel>
