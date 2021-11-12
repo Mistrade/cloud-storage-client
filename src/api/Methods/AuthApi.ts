@@ -3,6 +3,8 @@ import { Api, ApiResponse } from '../index'
 import { UserDataModel, UserInfoModel } from '../../reducers/UserReducer/types'
 
 export interface RegistrationModel {
+  name: string,
+  surname: string,
   email: string,
   password: string,
   confirmPassword: string

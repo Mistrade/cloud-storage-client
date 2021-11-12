@@ -5,6 +5,8 @@ const initialState: UserInfoModel = {
   isAuth: false,
   userData: {
     email: '',
+    name: '',
+    surname: '',
     storageSpace: 0,
     usingPercent: 0,
     usingStorage: 0,

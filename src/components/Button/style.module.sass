@@ -1,0 +1,23 @@
+@import './src/style/variable'
+
+.button
+  background-color: #FFF
+  border-radius: 8px
+  outline: none
+  border: $main-border
+  font-family: $font
+  font-weight: 500
+  font-size: 16px
+  padding: 10px 30px
+  transition: all .3s ease-in
+  cursor: pointer
+  border-color: cornflowerblue
+  color: cornflowerblue
+
+  &:hover
+    color: $font-color
+    border-color: $font-color
+
+  &:disabled
+    color: $disabled-color
+    border-color: $disabled-color

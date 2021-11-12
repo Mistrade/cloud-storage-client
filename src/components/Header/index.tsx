@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = () => {
         </>
       ) : (
         <>
-          <Link className={style.headerLink} to={'/auth'}>
+          <Link className={style.headerLink} to={'/auth/login'}>
             Вход в систему
           </Link>
         </>
