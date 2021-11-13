@@ -4,11 +4,12 @@ export interface UserInfoModel {
 }
 
 export interface UserDataModel {
+  avatar: string | null
   id: string,
   email: string,
   name: string,
   surname: string,
   storageSpace: number,
-  usingStorage: number,
+  usingSpace: number,
   usingPercent: number,
 }

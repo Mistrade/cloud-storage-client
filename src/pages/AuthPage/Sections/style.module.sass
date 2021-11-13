@@ -8,6 +8,7 @@
   box-shadow: $main-shadow
   display: flex
   flex-wrap: wrap
+  animation: formAnimation .5s ease-in
 
   .formTitle
     width: 100%
@@ -16,3 +17,9 @@
     font-family: $font
     color: $font-color
     text-align: center
+
+@keyframes formAnimation
+  0%
+    opacity: 0
+  100%
+    opacity: 1

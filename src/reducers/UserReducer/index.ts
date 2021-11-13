@@ -4,12 +4,13 @@ import { UserDataModel, UserInfoModel } from './types'
 const initialState: UserInfoModel = {
   isAuth: false,
   userData: {
+    avatar: null,
     email: '',
     name: '',
     surname: '',
     storageSpace: 0,
     usingPercent: 0,
-    usingStorage: 0,
+    usingSpace: 0,
     id: ''
   }
 }
@@ -25,8 +26,9 @@ const userReducerSlice = createSlice( {
       state.isAuth = true
       state.userData = data.payload
     },
-    logout( state: UserInfoModel ) {
-      state = initialState
+    logout( state: UserInfoModel, data: PayloadAction) {
+      state.isAuth = false
+      state.userData = initialState.userData
     }
   }
 } )

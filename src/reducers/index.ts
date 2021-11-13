@@ -2,11 +2,15 @@ import { Action, AnyAction, combineReducers, configureStore, ThunkDispatch } fro
 import { userInfo } from './UserReducer/index'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 import { NotificationStorage } from './NotificationReducer'
+import { filesStorage } from './FileReducer'
+import { configStorage } from './ConfigReducer'
 
 
 const reducers = combineReducers({
   userInfo: userInfo,
-  notification: NotificationStorage
+  notification: NotificationStorage,
+  files: filesStorage,
+  config: configStorage
 })
 
 

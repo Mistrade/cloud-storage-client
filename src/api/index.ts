@@ -1,9 +1,10 @@
 import axios, { AxiosResponse } from "axios";
 
 const instance = axios.create({
-  // withCredentials: true,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
+    "Origin": window.location.origin
   },
   baseURL: 'http://localhost:9001/'
 })

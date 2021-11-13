@@ -13,5 +13,5 @@ const FileReducer = createSlice({
   }
 })
 
-export const {} = FileReducer.actions
-export const FileStorage = FileReducer.reducer
+export const filesActions = FileReducer.actions
+export const filesStorage = FileReducer.reducer

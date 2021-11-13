@@ -10,7 +10,10 @@ export interface RegistrationModel {
   confirmPassword: string
 }
 
-export type LoginModel = Omit<RegistrationModel, 'confirmPassword'>
+export type LoginModel = {
+  email: string,
+  password: string
+}
 
 export interface ApiMessage {
   message: string
@@ -22,7 +25,9 @@ export interface LoginSuccessModel {
 
 interface AuthApiModel {
   registration: (data: RegistrationModel) => ApiResponse<ApiMessage>,
-  login: (data: LoginModel) => ApiResponse<LoginSuccessModel | ApiMessage>
+  login: (data: LoginModel) => ApiResponse<LoginSuccessModel | ApiMessage>,
+  checkSession: () => ApiResponse<ApiMessage | LoginSuccessModel>,
+  logout: () => ApiResponse<ApiMessage>
 }
 
 export const AuthApiConfig = {
@@ -44,5 +49,11 @@ export const AuthApi: AuthApiModel = {
 
     //Принимает объект вида LoginModel и возвращает объект вида LoginSuccessModel
     return await Api.post<LoginModel, LoginSuccessModel>(apiURLS.login, data)
+  },
+  async checkSession(){
+    return await Api.post<any, any>(apiURLS.checkSession, {})
+  },
+  async logout(){
+    return await Api.post<any, ApiMessage>(apiURLS.logout, {})
   }
 }
