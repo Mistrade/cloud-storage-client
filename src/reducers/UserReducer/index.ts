@@ -1,8 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { UserDataModel, UserInfoModel } from './types'
+import { UserDataModel, UserErrorAuthModel, UserInfoModel } from './types'
+import { ApiMessage } from '../../api/Methods/AuthApi'
+import { LsHandler, LSKeys } from '../../common/lsHandler'
 
 const initialState: UserInfoModel = {
   isAuth: false,
+  error: LsHandler.getItem<UserErrorAuthModel>( 'AuthErrorObject' ) || null,
   userData: {
     avatar: null,
     email: '',
@@ -26,9 +29,16 @@ const userReducerSlice = createSlice( {
       state.isAuth = true
       state.userData = data.payload
     },
-    logout( state: UserInfoModel, data: PayloadAction) {
+    logout( state: UserInfoModel, data: PayloadAction ) {
       state.isAuth = false
       state.userData = initialState.userData
+    },
+    setConfirmPasswordInfo( state: UserInfoModel, data: PayloadAction<ApiMessage | null> ) {
+      state.error = {
+        type: data.payload?.type || null,
+        message: data.payload?.message || null,
+        userId: data.payload?.userId || null
+      }
     }
   }
 } )

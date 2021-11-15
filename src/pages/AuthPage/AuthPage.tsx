@@ -10,8 +10,9 @@ import { StatusType } from '../../components/Inputs/types'
 import validator from 'validator'
 import { AuthSection } from './Sections/AuthSection'
 import { useAppDispatch, useAppSelector } from '../../reducers'
+import { ConfirmPasswordSection } from './Sections/ConfirmPassword'
 
-export type AuthType = 'login' | 'registration' | 'forgot-password'
+export type AuthType = 'login' | 'registration' | 'forgot-password' | 'confirm-password'
 
 export interface RegistrationFormModel {
   name: FieldStateProps,
@@ -51,18 +52,29 @@ const AuthPage: React.FC<RouteComponentProps<{ mode: AuthType }>> = ( { match } 
   const history = useHistory()
   const isAuth = useAppSelector( state => state.userInfo.isAuth )
   const [state, setState] = useState<RegistrationFormModel>( AuthInitialStateConfig )
+  const reason = useAppSelector(state => state.userInfo.error)
+
+
+  useEffect(() => {
+    if(reason){
+      setMode('confirm-password')
+    }
+  }, [reason])
 
   useEffect( () => {
     if( isAuth ) {
-      setState( AuthInitialStateConfig )
-      history.push( '/work-space' )
+      resetStateAndPushToURL('/work-space')
     }
   }, [isAuth] )
 
   useEffect( () => {
-    history.push( '/auth/' + mode )
-    setState( AuthInitialStateConfig )
+    resetStateAndPushToURL('/auth/' + mode)
   }, [mode] )
+
+  const resetStateAndPushToURL = (url: string) => {
+    history.push( url )
+    setState( AuthInitialStateConfig )
+  }
 
   const blurHandler = async ( input: FormInputNames, value: string ) => {
     if( input === 'name' || input === 'surname' ) {
@@ -142,6 +154,14 @@ const AuthPage: React.FC<RouteComponentProps<{ mode: AuthType }>> = ( { match } 
         <Route path={'/auth/login'} exact={true}>
           <AuthSection
             formTitle={'Вход в систему'}
+            blurHandler={blurHandler}
+            state={state}
+            setState={setState}
+            changeModeHandler={changeModeHandler}
+          />
+        </Route>
+        <Route path={'/auth/confirm-password'}>
+          <ConfirmPasswordSection
             blurHandler={blurHandler}
             state={state}
             setState={setState}

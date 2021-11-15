@@ -7,11 +7,12 @@ import {
   RegistrationModel
 } from '../../api/Methods/AuthApi'
 import validator from 'validator'
-import { UserDataModel } from './types'
+import { UserDataModel, UserErrorAuthModel, UserInfoModel } from './types'
 import { userInfoActions } from './index'
 import { NameRegularExpression } from '../../common/common'
 import { configActions, initialLoaderState } from '../ConfigReducer'
 import { AppState } from '../index'
+import { LsHandler } from '../../common/lsHandler'
 
 export const UserInfoMethods = {
   registration: createAsyncThunk<any, RegistrationModel, any>( '/saveUser', async ( data, thunkAPI ) => {
@@ -77,6 +78,8 @@ export const UserInfoMethods = {
 
     if( emailValidate && passwordValidate ) {
       const response = await AuthApi.login( data )
+      console.log( response.data )
+      console.log( response.status )
       if( response.status === 200 && 'userData' in response.data ) {
         const data: UserDataModel = response.data.userData
         dispatch( userInfoActions.saveUser( data ) )
@@ -84,7 +87,26 @@ export const UserInfoMethods = {
         return thunkAPI.fulfillWithValue( 'Вы успешно авторизовались!' ), dispatch( configActions.setLoader( initialLoaderState ) )
       } else {
         response.data = response.data as unknown as ApiMessage
-        return thunkAPI.rejectWithValue( response.data.message ), dispatch( configActions.setLoader( initialLoaderState ) )
+        dispatch( configActions.setLoader( initialLoaderState ) )
+
+        console.log( response.status )
+
+        if( response.status === 403 ) {
+          console.log( 'Зашло в 403' )
+          const state = thunkAPI.getState() as AppState
+          dispatch( userInfoActions.setConfirmPasswordInfo( response.data as ApiMessage ) )
+          LsHandler.saveItem( 'AuthErrorObject', response.data )
+
+          console.log( 'before state: ', state )
+          console.log( 'response data: ', response.data )
+          console.log( 'after state', thunkAPI.getState() )
+          if( state.userInfo.isAuth ) {
+            dispatch( userInfoActions.logout() )
+          }
+        }
+
+
+        return thunkAPI.rejectWithValue( response.data.message )
       }
 
 
@@ -116,6 +138,9 @@ export const UserInfoMethods = {
       dispatch( configActions.setLoader( initialLoaderState ) )
       return thunkAPI.fulfillWithValue( 'ok' )
     } else {
+      console.log( response.data )
+      console.log( response.status )
+
       response.data = response.data as ApiMessage
       dispatch( configActions.setLoader( initialLoaderState ) )
       return thunkAPI.rejectWithValue( response.data.message )
@@ -143,5 +168,53 @@ export const UserInfoMethods = {
     } else {
       return thunkAPI.rejectWithValue( response.data.message )
     }
+  } ),
+  resolveConflict: createAsyncThunk<any, { userId: string, password: string, type: UserErrorAuthModel['type'] }, { state: AppState }>( 'resolveConflict', async ( data, thunkAPI ) => {
+    const { userId, password, type } = data
+
+    if( !userId ) {
+      return thunkAPI.rejectWithValue( 'Время жизни сессии истекло. Попробуйте авторизоваться снова' )
+    }
+
+    if( !type ) {
+      return thunkAPI.rejectWithValue( 'Неизвестный тип ошибки. Действие было отменено!' )
+    }
+
+    const validPassword = validator.isLength( password, {
+      min: AuthApiConfig.password.minLength,
+      max: AuthApiConfig.password.maxLength
+    } )
+
+    if( !password || !validPassword ) {
+      return thunkAPI.rejectWithValue( 'Пожалуйста, для подтверждения прав на доступ к аккаунту, укажите верный пароль!' )
+    }
+
+    const dispatch = thunkAPI.dispatch
+
+    if( type === 'confirm-password' ) {
+      const response = await AuthApi.updateDevice( { userId, password } )
+
+      if( response.status === 200 ) {
+        response.data = response.data as unknown as LoginSuccessModel
+        dispatch( userInfoActions.saveUser( response.data.userData ) )
+        await LsHandler.remove( 'AuthErrorObject' )
+        return thunkAPI.fulfillWithValue( 'Текущее устройство было успешно добавлено к вашему аккаунту!' )
+      } else {
+        if( response.status === 400 ) {
+
+          response.data = response.data as unknown as ApiMessage
+          const state = thunkAPI.getState()
+          dispatch( userInfoActions.setConfirmPasswordInfo( response.data as ApiMessage ) )
+          LsHandler.saveItem( 'AuthErrorObject', response.data )
+
+          if( state.userInfo.isAuth ) {
+            dispatch( userInfoActions.logout() )
+          }
+
+          return thunkAPI.rejectWithValue( response.data.message )
+        }
+      }
+    }
+
   } )
 }

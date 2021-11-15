@@ -1,15 +1,15 @@
 import axios, { AxiosResponse } from "axios";
+import { ApiMessage } from './Methods/AuthApi'
 
 const instance = axios.create({
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
-    "Origin": window.location.origin
   },
   baseURL: 'http://localhost:9001/'
 })
 
-export type ApiResponse<T> = Promise<AxiosResponse<T>>
+export type ApiResponse<T = any> = Promise<AxiosResponse<T | ApiMessage>>
 type ApiMethods = 'get' | 'post'
 type ApiModel = {
   [key in ApiMethods]: <T = any, D = any>(url: string, data: T) => ApiResponse<D>
@@ -35,13 +35,13 @@ export const Api: ApiModel = {
     const requestUrl = urlData.length ? `${url}?${urlData.join('&')}` : url
 
     //Возвращаем результат выполнения асинхронного запроса
-    return instance.get(requestUrl).then((r) => r).catch((e) => e)
+    return instance.get(requestUrl).then((r) => r).catch((e) => e.response)
   },
 
   //Метод post - используется для отправки данных на сервер.
   post: (url, data) => {
 
     //Просто передаю полученные данные в instance чтобы отправить их на сервер.
-    return instance.post(url, data).then(r => r).catch(e => e)
+    return instance.post(url, data).then(r => r).catch((e) => e.response)
   }
 }
