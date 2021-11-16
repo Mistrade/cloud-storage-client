@@ -1,3 +1,5 @@
+import { AuthType } from '../../pages/AuthPage/AuthPage'
+
 export interface UserInfoModel {
   isAuth: boolean
   error: UserErrorAuthModel | null
@@ -5,7 +7,7 @@ export interface UserInfoModel {
 }
 
 export interface UserErrorAuthModel {
-  type: null | 'confirm-password' | 'repeat-confirm-password',
+  type: null | AuthType,
   userId: string | null,
   message: string | null,
 }

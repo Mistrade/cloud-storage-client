@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { MainInput } from '../../../components/Inputs/MainInput'
 import { RegistrationSectionProps } from './types'
 import { useAppDispatch, useAppSelector } from '../../../reducers'
 import style from './style.module.sass'
 import { Button, ButtonGroup } from '../../../components/Button'
 import { UserInfoMethods } from '../../../reducers/UserReducer/thunk'
+import { userInfoActions } from '../../../reducers/UserReducer'
+import { useHistory } from 'react-router'
 
 export const ConfirmPasswordSection: React.FC<RegistrationSectionProps> = ( {
                                                                               changeModeHandler,
@@ -16,6 +18,13 @@ export const ConfirmPasswordSection: React.FC<RegistrationSectionProps> = ( {
                                                                             } ) => {
   const dispatch = useAppDispatch()
   const reason = useAppSelector( state => state.userInfo.error )
+  const history = useHistory()
+
+  useEffect( () => {
+    return () => {
+      dispatch( userInfoActions.setConfirmPasswordInfo( null ) )
+    }
+  }, [] )
 
   return (
     <form
@@ -43,6 +52,7 @@ export const ConfirmPasswordSection: React.FC<RegistrationSectionProps> = ( {
         status={state.password.status}
         errorMessage={state.password.message}
         isRequired={true}
+        inputType={'password'}
       />
       <ButtonGroup justifyButtons={'center'}>
         <Button type={'main'} text={'Подтвердить'} htmlType={'submit'}/>

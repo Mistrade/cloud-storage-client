@@ -124,7 +124,7 @@ export const UserInfoMethods = {
       return thunkAPI.rejectWithValue( 'Email-адрес или пароль - невалидные' ), dispatch( configActions.setLoader( initialLoaderState ) )
     }
   } ),
-  checkSession: createAsyncThunk<any, any, any>( 'checkSession', async ( data, thunkAPI ) => {
+  checkSession: createAsyncThunk<any, any, any>( '/checkSession', async ( data, thunkAPI ) => {
     const dispatch = thunkAPI.dispatch
     dispatch( configActions.setLoader( {
       isActive: true,
@@ -146,7 +146,7 @@ export const UserInfoMethods = {
       return thunkAPI.rejectWithValue( response.data.message )
     }
   } ),
-  logout: createAsyncThunk<any, unknown, any>( 'logout', async ( data = {}, thunkAPI ) => {
+  logout: createAsyncThunk<any, unknown, any>( '/logout', async ( data = {}, thunkAPI ) => {
     const dispatch = thunkAPI.dispatch
     const state: AppState = thunkAPI.getState() as AppState
 
@@ -169,14 +169,23 @@ export const UserInfoMethods = {
       return thunkAPI.rejectWithValue( response.data.message )
     }
   } ),
-  resolveConflict: createAsyncThunk<any, { userId: string, password: string, type: UserErrorAuthModel['type'] }, { state: AppState }>( 'resolveConflict', async ( data, thunkAPI ) => {
+  resolveConflict: createAsyncThunk<any, { userId: string, password: string, type: UserErrorAuthModel['type'] }, { state: AppState }>( '/resolveConflict', async ( data, thunkAPI ) => {
+    const dispatch = thunkAPI.dispatch
+    dispatch( configActions.setLoader( {
+      message: 'Производим проверку вашего пароля и регистрацию текущего устройства!',
+      isActive: true
+    } ) )
+
     const { userId, password, type } = data
 
     if( !userId ) {
+      dispatch( configActions.setLoader( { message: '', isActive: false } ) )
       return thunkAPI.rejectWithValue( 'Время жизни сессии истекло. Попробуйте авторизоваться снова' )
     }
 
     if( !type ) {
+      dispatch( configActions.setLoader( { message: '', isActive: false } ) )
+
       return thunkAPI.rejectWithValue( 'Неизвестный тип ошибки. Действие было отменено!' )
     }
 
@@ -186,10 +195,9 @@ export const UserInfoMethods = {
     } )
 
     if( !password || !validPassword ) {
+      dispatch( configActions.setLoader( { message: '', isActive: false } ) )
       return thunkAPI.rejectWithValue( 'Пожалуйста, для подтверждения прав на доступ к аккаунту, укажите верный пароль!' )
     }
-
-    const dispatch = thunkAPI.dispatch
 
     if( type === 'confirm-password' ) {
       const response = await AuthApi.updateDevice( { userId, password } )
@@ -198,6 +206,7 @@ export const UserInfoMethods = {
         response.data = response.data as unknown as LoginSuccessModel
         dispatch( userInfoActions.saveUser( response.data.userData ) )
         await LsHandler.remove( 'AuthErrorObject' )
+        dispatch( configActions.setLoader( { message: '', isActive: false } ) )
         return thunkAPI.fulfillWithValue( 'Текущее устройство было успешно добавлено к вашему аккаунту!' )
       } else {
         if( response.status === 400 ) {
@@ -211,6 +220,8 @@ export const UserInfoMethods = {
             dispatch( userInfoActions.logout() )
           }
 
+
+          dispatch( configActions.setLoader( { message: '', isActive: false } ) )
           return thunkAPI.rejectWithValue( response.data.message )
         }
       }

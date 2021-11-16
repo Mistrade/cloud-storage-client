@@ -11,8 +11,14 @@ import validator from 'validator'
 import { AuthSection } from './Sections/AuthSection'
 import { useAppDispatch, useAppSelector } from '../../reducers'
 import { ConfirmPasswordSection } from './Sections/ConfirmPassword'
+import { UserErrorAuthModel } from '../../reducers/UserReducer/types'
 
-export type AuthType = 'login' | 'registration' | 'forgot-password' | 'confirm-password'
+export type AuthType =
+  'login'
+  | 'registration'
+  | 'forgot-password'
+  | 'confirm-password'
+  | 'repeat-confirm-password'
 
 export interface RegistrationFormModel {
   name: FieldStateProps,
@@ -48,30 +54,32 @@ export const AuthInitialStateConfig = {
 }
 
 const AuthPage: React.FC<RouteComponentProps<{ mode: AuthType }>> = ( { match } ) => {
-  const [mode, setMode] = useState<AuthType>( match.params.mode )
   const history = useHistory()
   const isAuth = useAppSelector( state => state.userInfo.isAuth )
   const [state, setState] = useState<RegistrationFormModel>( AuthInitialStateConfig )
-  const reason = useAppSelector(state => state.userInfo.error)
+  const reason = useAppSelector( state => state.userInfo.error )
 
 
-  useEffect(() => {
-    if(reason){
-      setMode('confirm-password')
+  useEffect( () => {
+    const currentMode = match.params.mode
+    if( reason ) {
+      resetStateAndPushToURL( '/auth/' + reason.type || 'login' )
+    } else if( currentMode !== 'login' && currentMode !== 'registration' && currentMode !== 'forgot-password' && !reason ) {
+      resetStateAndPushToURL( '/auth/login' )
     }
-  }, [reason])
+  }, [reason] )
 
   useEffect( () => {
     if( isAuth ) {
-      resetStateAndPushToURL('/work-space')
+      resetStateAndPushToURL( '/work-space' )
     }
   }, [isAuth] )
 
   useEffect( () => {
-    resetStateAndPushToURL('/auth/' + mode)
-  }, [mode] )
+    setState( AuthInitialStateConfig )
+  }, [match.params.mode] )
 
-  const resetStateAndPushToURL = (url: string) => {
+  const resetStateAndPushToURL = ( url: string ) => {
     history.push( url )
     setState( AuthInitialStateConfig )
   }
@@ -133,7 +141,7 @@ const AuthPage: React.FC<RouteComponentProps<{ mode: AuthType }>> = ( { match } 
   }
 
   const changeModeHandler = ( mode: AuthType ) => {
-    setMode( mode )
+    history.push( '/auth/' + mode )
   }
 
   return (
@@ -160,7 +168,7 @@ const AuthPage: React.FC<RouteComponentProps<{ mode: AuthType }>> = ( { match } 
             changeModeHandler={changeModeHandler}
           />
         </Route>
-        <Route path={'/auth/confirm-password'}>
+        <Route path={['/auth/confirm-password', '/auth/repeat-confirm-password']}>
           <ConfirmPasswordSection
             blurHandler={blurHandler}
             state={state}

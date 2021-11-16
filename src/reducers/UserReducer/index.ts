@@ -34,11 +34,21 @@ const userReducerSlice = createSlice( {
       state.userData = initialState.userData
     },
     setConfirmPasswordInfo( state: UserInfoModel, data: PayloadAction<ApiMessage | null> ) {
-      state.error = {
+      state.error = data.payload ? {
         type: data.payload?.type || null,
         message: data.payload?.message || null,
         userId: data.payload?.userId || null
+      } : null
+    },
+    findErrorFromLocalStorage( state: UserInfoModel, data: PayloadAction ) {
+      const item = LsHandler.getItem( 'AuthErrorObject' )
+
+      if( !item ) {
+        state.error = null
+        return
       }
+
+      state.error = item
     }
   }
 } )
